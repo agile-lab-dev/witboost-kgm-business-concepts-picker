@@ -47,6 +47,25 @@ When no `fieldMapping` is provided (or the query is a plain string), the built-i
 | `description`       | `?definition`   | The concept definition                   |
 | `referenceGlossary` | `?schemeLabel`  | The vocabulary/scheme the concept belongs to |
 
+The default mapping is applied automatically in the following cases:
+
+1. **Plain string query** — no `fieldMapping` specified:
+   ```yaml
+   sparql_queries:
+     my-query: |
+       SELECT ?label ?definition ?schemeLabel WHERE { ... }
+   ```
+2. **Structured query without `fieldMapping`** — only `query` is provided:
+   ```yaml
+   sparql_queries:
+     my-query:
+       query: |
+         SELECT ?label ?definition ?schemeLabel WHERE { ... }
+   ```
+3. **No query configured at all** — the built-in default SPARQL query runs (fetches SKOS concepts with `?label`, `?definition`, `?schemeLabel`).
+
+In all three cases the resulting items will have `id`, `value`, `description`, and `referenceGlossary` fields.
+
 #### Custom mapping example
 
 ```yaml
