@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+{{- include "pythonsp.labels" . | nindent 4 }}
+  name: {{ template "pythonsp.fullname" . }}-config
+data:
+  application.yaml: |
+  {{- if .Values.configOverride -}}
+  {{- .Values.configOverride | nindent 4 }}
+  {{- else }}
+    kgm:
+      base_url: {{ .Values.kgm.baseUrl | quote }}
+      sparql_queries:
+      {{- if .Values.kgm.sparqlQueries }}
+        {{- .Values.kgm.sparqlQueries | toYaml | nindent 8 }}
+      {{- else }}
+        {}
+      {{- end }}
+    custom_url_picker:
+      cors:
+        origin: "*"
+  {{- end }}

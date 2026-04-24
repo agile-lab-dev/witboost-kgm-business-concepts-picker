@@ -1,0 +1,66 @@
+# -- Docker Registry Secret name used to access a private repo
+dockerRegistrySecretName: regcred
+
+globals:
+  # External secrets are used to inject secrets from external secret managers
+  externalSecrets:
+    # -- Secret store installed in the cluster
+    secretStore: witboost-secret-store
+    # -- Secrets refresh interval
+    refreshInterval: 15m
+
+image:
+  # -- Image repository
+  registry: registry.example.com/kgm-custom-url-picker
+  # -- Image tag
+  tag: latest
+  # -- The imagePullPolicy for a container and the tag of the image affect when the kubelet attempts to pull (download) the specified image.
+  pullPolicy: Always
+
+kgm:
+  # -- Base URL of the Knowledge Graph Manager
+  baseUrl: "http://kgm:8080"
+  # -- Named SPARQL queries, each identified by a key.
+  # The caller selects which query to run via ?sparql=<key>.
+  # If no key is specified, the "default" key is used.
+  # If "default" is not configured, the built-in default query is used.
+  # Placeholders $1, $2, … are replaced with ?sparql-params values.
+  sparqlQueries: {}
+  # Example:
+  #   sparqlQueries:
+  #     business-concept-query: |
+  #       PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  #       SELECT DISTINCT ?label ?definition ?schemeLabel
+  #       WHERE { ... }
+  #     business-term-query: |
+  #       PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+  #       SELECT DISTINCT ?label ?definition ?schemeLabel
+  #       WHERE { ?term skos:broader <$1> ; ... }
+
+# -- define extra variables to add to the container(s)
+# e.g:
+# extraEnvVars:
+#   - name: FOO
+#     value: "10"
+extraEnvVars: []
+
+# -- readiness probe spec
+readinessProbe: {}
+
+# -- liveness probe spec
+livenessProbe: {}
+
+# -- security context spec
+securityContext:
+  runAsUser: 1001
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+
+# -- resources spec
+resources: {}
+
+# -- Allows you to specify common labels
+labels: {}
+
+# -- This configuration allows you to override the application.yaml file
+configOverride:

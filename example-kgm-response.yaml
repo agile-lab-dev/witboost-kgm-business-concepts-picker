@@ -1,0 +1,1357 @@
+{
+    "head": {
+        "vars": [
+            "concept",
+            "label",
+            "definition",
+            "scheme",
+            "schemeLabel"
+        ]
+    },
+    "results": {
+        "bindings": [
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#Channels"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Banking Channels"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Means through which banking services are delivered."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#CustomerMetric"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Customer Metric"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "A quantitative measure describing customer behaviour, value or cost to the bank."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#FinancialInstruments"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Financial Instruments"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Assets that can be traded in financial markets."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#Investments"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Investment Services"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Services that help clients grow and manage wealth."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#Liquidity"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Liquidity"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "The ability of a bank to fund increases in assets and meet obligations as they come due."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#Risks"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Risk Categories"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Various types of risks that banks are exposed to."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#RWA"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Risk-Weighted Assets (RWA)"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Total of a bank's assets and off-balance-sheet exposures weighted by regulatory risk factors."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#BankingVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Banking and Financial Services Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#AUTENTICAZIONE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "AUTENTICAZIONE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Processo attraverso il quale un sistema verifica l'identità dichiarata di un cliente o operatore del Gruppo Poste Italiane, per autorizzare l'accesso a servizi, funzionalità o dati. Può prevedere diversi livelli di sicurezza e modalità, come l’autenticazione forte (SCA) o la firma elettronica avanzata."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#CANALE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "CANALE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Modalità o punto di accesso attraverso cui un cliente o un operatore interagisce con il Gruppo Poste Italiane per fruire o trasmettere prodotti, servizi o comunicazioni (sia di natura commerciale che non commerciale). I canali possono essere fisici (es. sportello) o digitali (es. app)."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#CLIENTE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "CLIENTE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Soggetto, fisico o giuridico, identificato nei sistemi di Poste Italiane, che usufruisce di prodotti o servizi attraverso canali e interazioni diversificate. È descritto da attributi anagrafici, comportamentali e relazionali, ed è connesso a offerte, operazioni, forme di pagamento, geolocalizzazione, profilo, recapiti ed eventi rilevanti per la personalizzazione dell’esperienza."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#CONTATTO"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "CONTATTO"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Informazioni necessarie per raggiungere o contattare un soggetto (cliente, partner, struttura), fisicamente o digitalmente."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#DATA"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "DATA"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Riferimento temporale che identifica un momento significativo nel ciclo di vita di un’informazione, evento, documento, operazione o offerta. Le date consentono la tracciabilità e il governo dei processi digitali e fisici del Gruppo Poste Italiane."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#DATA_PRODUCT"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "DATA PRODUCT"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "È la più piccola unità architetturale dotata di alta coesione funzionale, in grado di gestire tutti gli aspetti del Data Management e dialogare con il resto del mondo tramite interfacce standardizzate e interoperabili. Un DP incapsula le entità/informazioni – metadati, algoritmi, dati, metodi di accesso, regole di sincronizzazione, flussi di dati orchestrati, Data Lineage verso i sistemi di origine, audit log delle modifiche dei dati, controlli di accesso – trasformando dati grezzi in informazioni utili e azionabili per gli utenti o per altri sistemi"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#DATA_QUALITY"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "DATA QUALITY"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "L'insieme delle caratteristiche (\"dimensioni\") che determinano l'affidabilità, l'accuratezza, la completezza e la coerenza dei Data Product e dei modelli ML, rendendoli idonei all'uso previsto."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#DATO_PERSONALE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "DATO PERSONALE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Qualsiasi informazione riguardante una persona fisica identificata o identificabile («Interessato»); si considera identificabile la persona fisica che può essere identificata, direttamente o indirettamente, con particolare riferimento a un identificativo come nome, cognome, un numero di identificazione, dati relativi all'ubicazione, un identificativo online o a uno o più elementi caratteristici della sua identità fisica, fisiologica, genetica, psichica, economica, culturale o sociale."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#DOCUMENTAZIONE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "DOCUMENTAZIONE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rappresenta un documento valido archiviato nel sistema documentale aziendale, utilizzato per finalità operative, identificative o regolatorie."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#GEOLOCALIZZAZIONE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "GEOLOCALIZZAZIONE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Posizione geografica associata a un soggetto, evento, interazione o transazione, espressa tramite riferimenti spaziali quali coordinate GPS, indirizzo, comune, provincia, regione, nazione e CAP. Questi dati sono utilizzati per geolocalizzazione, analisi territoriale, logistica e tracciamento."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#IDENTIFICATIVO"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "IDENTIFICATIVO"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Codice o informazione univoca associata a un cliente, utilizzata dai sistemi e dai processi del Gruppo Poste Italiane per riconoscere, tracciare e gestire in modo univoco l’identità del soggetto (persona fisica o giuridica) nell’ambito delle relazioni commerciali,  amministrative o operative.\nPuò essere generato internamente (es. User ID) o derivare da fonti esterne (es. codice fiscale)."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#INTELLIGENZA_ARTIFICIALE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "INTELLIGENZA ARTIFICIALE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Ramo dell'informatica che si occupa della creazione di sistemi capaci di simulare processi cognitivi umani, come l'apprendimento, il ragionamento e la risoluzione di problemi."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#KEY_PERFORMANCE_INDICATOR"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "KEY PERFORMANCE INDICATOR"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Un indicatore di marketing, o Key Performance Indicator (KPI), è una metrica che viene utilizzata per misurare l'efficacia e l'efficienza di un'attività di marketing. Questi indicatori aiutano le aziende a monitorare il successo delle campagne, identificare punti di forza e debolezza, e a prendere decisioni informate per migliorare i risultati."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#OFFERTA"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "OFFERTA"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Insieme di prodotti, servizi o soluzioni proposti dal Gruppo Poste Italiane ai propri clienti, finalizzati a soddisfare specifiche esigenze o bisogni. L’offerta può includere beni tangibili, servizi finanziari, postali, assicurativi, o di altro tipo e può essere resa disponibile attraverso canali fisici (es. uffici postali, sportelli) o canali digitali (es. app, sito web)."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#OPERAZIONE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "OPERAZIONE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Azione eseguita da un cliente o operatore, digitale o fisica, che comporta o meno un movimento economico. Comprende: vendite (es. acquisto polizza), transazioni (es. pagamento bollettino), attività informative o gestionali (es. prenotazione appuntamento per ritiro pacco, simulazione prodotto). Un'operazione può avvenire in modalità fisica o digitale, a seconda del canale utilizzato (es. ufficio postale, sito web, app, call center, ...)."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#PROFILO_CLIENTE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "PROFILO CLIENTE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rappresentazione strutturata delle informazioni relative al cliente, utile per identificarne caratteristiche, comportamenti, livello di interazione con Poste Italiane e altri aspetti rilevanti per l’erogazione di servizi personalizzati."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#SISTEMA_DI_INTELLIGENZA_ARTIFICIALE"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "SISTEMA DI INTELLIGENZA ARTIFICIALE"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Sistema automatizzato progettato per funzionare con livelli di autonomia variabili e che può presentare adattabilità dopo la diffusione e che, per obiettivi espliciti o impliciti, deduce dall'input che riceve come generare output quali previsioni, contenuti, raccomandazioni o decisioni che possono influenzare ambienti fisici o virtuali. Esempi di applicazione includono sistemi per il fraud detection, capaci di identificare comportamenti anomali e prevenire attività fraudolente."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#unico"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Business Glossary Unico"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#Aftermarket"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Aftermarket"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Domain covering post-sale services, spare parts distribution, maintenance operations, and service network management for heavy-duty vehicles"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#ConnectedVehicle"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Connected Vehicle"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Domain encompassing all aspects of vehicle connectivity, telematics, fleet management, and real-time vehicle monitoring for heavy-duty trucks"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#FleetManagement"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Fleet Management"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Comprehensive management of commercial vehicle fleets including asset tracking, driver assignment, route optimization, and operational efficiency"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#PartsManagement"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Parts Management"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Management of spare parts inventory, compatibility rules, supplier relationships, and parts distribution for vehicle maintenance and repair"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#ServiceOperations"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Service Operations"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Execution and management of vehicle maintenance, repair, and service activities across authorized service network"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#ServiceProcedure"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Service Procedure"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Standardized documented process for performing specific maintenance or repair work on vehicles"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#SparePart"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Spare Part"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Component or assembly available for replacement or repair on vehicles to maintain operational readiness"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TelemetrySignal"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Telemetry Signal"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "A specific data point captured from vehicle sensors or control systems, representing a measurable parameter or state"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#Vehicle"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Vehicle"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Individual heavy-duty truck or commercial vehicle asset within a fleet"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#VehicleTelemetry"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Vehicle Telemetry"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Collection, transmission, and analysis of real-time data from vehicle sensors, control units, and diagnostic systems"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://truck.org/type#TruckManufacturingGlossary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Heavy-Duty Truck Manufacturing Business Glossary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#Employee"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Employee"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "A person hired by an organisation under an employment contract, receiving wages or salary and subject to the employer's direction."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#EmployeeLifecycle"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Employee Lifecycle"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "The various stages an employee goes through during their tenure with a company."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#Policies"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "HR Policies"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rules and procedures governing employee conduct and expectations."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#Performance"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Performance Management"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Processes to ensure employee goals align with the organization’s goals."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://ex.org/type#Person"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Person"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "A human being who may hold various relationships with an organisation."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#Recruitment"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Recruitment"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "The overall process of attracting, selecting, and appointing suitable candidates."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#Training"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Training and Development"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Programs that help employees improve skills and knowledge."
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://hr.org/type#HRVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Human Resources Vocabulary"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Agitator"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Agitator"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rotating equipment that mixes, blends, or suspends materials in liquid or vessel through mechanical agitation"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#AnalysisEquipment"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Analysis Equipment"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Instrumentation for real-time measurement of fluid composition, properties, or contaminants"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Compressor"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Compressor"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rotating equipment that compresses gases to higher pressures for use in pneumatic systems, refrigeration, and industrial processes"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Fan"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Fan"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rotating equipment that moves air or gas at low pressure differentials for ventilation, cooling, and pneumatic transport applications"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Filter"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Filter"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Static device for removing solid particles or contaminants from fluid streams"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#FlowMeasurement"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Flow Measurement"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Instrumentation for measuring volumetric or mass flow rate of fluids in piping"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#HeatExchanger"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Heat Exchanger"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Static equipment for transferring thermal energy between two or more fluid streams at different temperatures without mixing"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#InstrumentationEquipment"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Instrumentation and Control Equipment"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Equipment for measuring, monitoring, transmitting, and controlling process variables in industrial systems"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#LevelMeasurement"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Level Measurement"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Instrumentation for measuring liquid level in vessels and tanks"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Motor"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Motor"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rotating equipment that converts electrical energy into mechanical energy to drive pumps, compressors, fans, and other rotating machinery"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Piping"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Piping"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Systems of pipes, fittings, valves, flanges, and supports for transporting process fluids between equipment"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#PositiveDisplacementPump"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Positive Displacement Pump"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Pump using expanding and contracting chambers to move fixed volumes of fluid per cycle, providing constant flow regardless of pressure"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#PressureMeasurement"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Pressure Measurement"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Instrumentation for measuring fluid pressure at process locations"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Pump"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Pump"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rotating equipment that moves fluids through a system by creating pressure differentials, used to transport and circulate liquids in industrial processes"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#RotatingEquipment"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Rotating Equipment"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Equipment with rotating shafts and components designed to convert, transfer, or extract energy through rotational motion in industrial processes"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#StaticEquipment"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Static Equipment"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Industrial equipment with no rotating components, designed to contain, transfer, or process fluids in stationary configurations"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#TemperatureMeasurement"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Temperature Measurement"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Instrumentation for measuring process fluid or equipment temperature"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Turbine"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Turbine"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Rotating equipment that extracts energy from expanding pressurized fluid (steam, gas, or hot water) to produce mechanical or electrical power"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Valve"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Valve"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Static device for controlling fluid flow, pressure, or direction in piping and equipment connections"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            },
+            {
+                "concept": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#Vessel"
+                },
+                "label": {
+                    "type": "literal",
+                    "value": "Vessel"
+                },
+                "definition": {
+                    "type": "literal",
+                    "value": "Static container designed to hold or process fluids at specified pressures and temperatures, following pressure equipment directives"
+                },
+                "scheme": {
+                    "type": "uri",
+                    "value": "http://posccaesar.org/ido/equipment#EquipmentVocabulary"
+                },
+                "schemeLabel": {
+                    "type": "literal",
+                    "value": "Industrial Data Ontology - Equipment Classification"
+                }
+            }
+        ]
+    }
+}

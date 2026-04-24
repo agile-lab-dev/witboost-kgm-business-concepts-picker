@@ -1,0 +1,239 @@
+openapi: 3.0.3
+info:
+  title: Custom URL Picker API
+  description: |
+    <a href="/openapi/ui/custom-url-picker-openapi.yaml" target="_blank" download="custom-url-picker-openapi.yaml"><button>Download OpenAPI Specification</button></a>
+
+    A **Custom URL Picker** is a picker that can be used inside Witboost templates to ask information to end users through a drop-down menu.
+
+    The options of the drop-down menu can be supplied by a microservice implementing this **Custom URL Picker API** specification.
+
+    The microservice will be called by the Custom URL Picker to get the options to show to the user in the drop-down list on the UI. The user can filter out results by typing in the Custom URL Picker field. The microservice will return the first `limit` elements that match the filter, skipping the first `offset` elements.
+  version: '0.1.0'
+tags:
+  - name: CustomUrlPicker
+paths:
+  /v1/resources:
+    post:
+      tags:
+        - CustomUrlPicker
+      summary: Retrieve drop-down list options
+      description: |
+        Called by the Custom URL Picker to get the options to show to the user in the drop-down list on the UI.
+
+        The user can filter out results by typing in the Custom URL Picker field. The microservice will return the first `limit` elements that match the filter, skipping the first `offset` elements.
+      operationId: retrieveValues
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          description: |
+            The user input, that is typed by the user on the UI field, which is used to filter the values on the glossary. 
+
+            If not provided, the microservice will return all the values in the glossary following the pagination settings.
+          schema:
+            type: string
+            example: banana
+        - name: offset
+          in: query
+          description: the number of values to skip for each request
+          required: true
+          schema:
+            type: number
+            example: 0
+        - name: limit
+          in: query
+          description: the number of values to return at each request
+          required: true
+          schema:
+            type: number
+            minimum: 5
+            example: 5
+      requestBody:
+        required: false
+        description: A free-form object that can be used to define additional properties to use while performing a search in the glossary. This can be filled with other fields values coming from the template.
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              freeObject:
+                value:
+                  kind: fruit
+      responses:
+        200:
+          description: A list of options that will be shown to the user on the UI field.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Item'
+                example:
+                  - id: banana
+                    value: Banana
+                    description: A yellow fruit
+                  - id: apple
+                    value: Apple
+                    description: A fruit
+
+        400:
+          description: a list of bad request errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MalformedRequestError'
+              examples:
+                malformedRequest:
+                  value:
+                    errors: ['Error while validating your request']
+        500:
+          description: a list of system errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemError'
+              examples:
+                systemError:
+                  value:
+                    errors: ['System error fetching elements from the glossary']
+  /v1/resources/validate:
+    post:
+      tags:
+        - CustomUrlPicker
+      summary: Validate a selected option against the glossary
+      description: |
+        Called by the Custom URL picker to validate the selected values against the ones included in the glossary e.g. for checking if the selected values are still present in the glossary.
+
+        This API gets called when the user wants to modify some values e.g. by using the Edit Template, and a check is being run to see if the previously selected value is still present in the glossary with the exact shape.
+      operationId: validate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidationRequest'
+            examples:
+              validationRequest:
+                value:
+                  selectedObjects:
+                    - id: banana
+                  queryParameters:
+                    kind: fruit
+      responses:
+        200:
+          description: A string saying that the validation succeded
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'Validation succeded'
+        400:
+          description: A list of strings containing the validation errors
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+              examples:
+                validationError:
+                  value:
+                    errors: ['Word "orange" does not exist in the glossary']
+        500:
+          description: An internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemError'
+              examples:
+                systemError:
+                  value:
+                    errors: ['System error validating the selected values']
+components:
+  schemas:
+    Item:
+      type: object
+      description: |
+        An option that will be shown to the user through the Custom URL Picker on the UI.  
+        Its shape is totally governed by the configuration given to the Custom URL Picker, except for the `id` field which is the only required field.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: a unique identifier of the dropdown option
+      additionalProperties: true
+    MalformedRequestError:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: string
+    ValidationError:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          description: a list of errors that may happen during request validation
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: this is a string representing the error occured during validation
+        suggestion:
+          type: string
+          description: a string representing a suggestion of what a user can do for solving the above error
+    SystemError:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          description: a list of errors that may happen during API execution
+          type: array
+          items:
+            type: string
+    ValidationReponse:
+      type: object
+      required:
+        - result
+      properties:
+        result:
+          description: the object containing the results of the validation
+          type: object
+          $ref: '#/components/schemas/ValidatedItem'
+    ValidatedItem:
+      type: object
+      required:
+        - id
+    SelectedObject:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: a unique identifier of the dropdown option
+    ValidationRequest:
+      type: object
+      required:
+        - selectedObjects
+      properties:
+        selectedObjects:
+          description: the selected options to validate
+          type: array
+          items:
+            $ref: '#/components/schemas/SelectedObject'
+        queryParameters:
+          type: object
+          description: |
+            This field represents additional parameters to put in the request body. The user can use it
+            to define additional properties to use while performing a validation on the "selectedObject".

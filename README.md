@@ -1,93 +1,429 @@
-# KGM Business Concepts Picker
+# KGM Custom URL Picker
 
+A [Witboost](https://www.witboost.com/) **Custom URL Picker** microservice that serves drop-down options to templates by querying a **Knowledge Graph Manager (KGM)** SPARQL endpoint.
 
+## Overview
 
-## Getting started
+The Custom URL Picker is an extension point in Witboost. When a template form contains a Custom URL Picker field, Witboost calls this microservice to fetch the available options for the drop-down menu. Users can filter, paginate, and validate their selections.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This service queries a KGM instance via its SPARQL endpoint, extracts SKOS concepts, and maps them to the drop-down items expected by the [Custom URL Picker OpenAPI contract](custom-url-picker-openapi.yaml).
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+### Architecture
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/AgileFactory/Witboost.Mesh/Witboost.ExtensionPoints/kgm-business-concepts-picker.git
-git branch -M master
-git push -uf origin master
+Witboost UI  ──▶  POST /v1/resources?offset=0&limit=5&filter=…
+                  Body: { "sparql": "business-term-query", "sparql-params": "A|B" }
+                        │
+                        ▼
+                  ┌─────────────┐     _resolve_query()
+                  │   FastAPI    │───▶  look up named query
+                  │   Router     │      + replace $1, ${1*}, …
+                  └──────┬──────┘
+                         │  Depends()
+                         ▼
+                  ┌─────────────┐        SPARQL query        ┌─────────┐
+                  │  KgmService │  ─────────────────────▶    │   KGM   │
+                  └─────────────┘                            └─────────┘
 ```
 
-## Integrate with your tools
+### Item Mapping
 
-* [Set up project integrations](https://gitlab.com/AgileFactory/Witboost.Mesh/Witboost.ExtensionPoints/kgm-business-concepts-picker/-/settings/integrations)
+The SPARQL query results are mapped to Custom URL Picker items as follows:
 
-## Collaborate with your team
+| Custom URL Picker field | SPARQL binding    | Description                              |
+|-------------------------|-------------------|------------------------------------------|
+| `id`                    | `?label`          | The concept label (used as identifier)   |
+| `value`                 | `?label`          | The concept label (displayed to user)    |
+| `description`           | `?definition`     | The concept definition                   |
+| `referenceGlossary`     | `?schemeLabel`    | The vocabulary/scheme the concept belongs to |
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+## Named SPARQL Queries
 
-## Test and Deploy
+The platform team can configure **multiple named SPARQL queries** in `application.yaml`. Each query is identified by a unique key (e.g. `business-concept-query`, `business-term-query`).
 
-Use the built-in continuous integration in GitLab.
+When calling the Custom URL Picker, the **template author** specifies which query to run via the `?sparql=<key>` query parameter. This allows the same microservice instance to serve different drop-downs in different parts of the UI.
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+### Positional Placeholders
 
-***
+Queries can contain **scalar** and **list** placeholders that are replaced at runtime with values from the `sparql-params` field in the POST body (comma-separated positional params):
 
-# Editing this README
+| Placeholder | Type   | Description                                                        |
+|-------------|--------|--------------------------------------------------------------------|
+| `$1`, `$2`  | Scalar | Replaced with the corresponding comma-separated value as-is       |
+| `${1*}`, `${2*}` | List | Pipe-separated values expanded into SPARQL `VALUES` quoted strings |
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+**List placeholder example:** if `sparql-params` = `"Customer Metric|Investment"`, then `${1*}` is expanded to `"Customer Metric" "Investment"` — ready to use inside a SPARQL `VALUES` clause.
 
-## Suggestions for a good README
+### Example Configuration
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```yaml
+kgm:
+  base_url: "http://kgm:8080"
+  sparql_queries:
+    # Fetch top-level business concepts (parents)
+    business-concept-query: |
+      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+      SELECT DISTINCT ?label ?definition ?schemeLabel
+      WHERE {
+        ?concept a skos:Concept ;
+                 skos:inScheme ?scheme .
+        { ?child skos:broader ?concept . }
+        UNION
+        { ?concept skos:narrower ?child . }
+        OPTIONAL { ?concept skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+        OPTIONAL { ?concept skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
+      }
+      ORDER BY ?schemeLabel ?label
 
-## Name
-Choose a self-explaining name for your project.
+    # Fetch business terms narrower than one or more parent concepts.
+    # ${1*} is replaced with pipe-separated concept labels.
+    # e.g. sparql-params = "Customer Metric|Investment"
+    #   → VALUES ?parentLabel { "Customer Metric" "Investment" }
+    business-term-query: |
+      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+      SELECT DISTINCT ?label ?definition ?schemeLabel
+      WHERE {
+        VALUES ?parentLabel { ${1*} }
+        ?parent skos:prefLabel ?parentLabel .
+        ?term a skos:Concept ;
+              skos:broader ?parent ;
+              skos:inScheme ?scheme .
+        OPTIONAL { ?term skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+        OPTIONAL { ?term skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
+      }
+      ORDER BY ?label
+```
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### Query Resolution Rules
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+| `?sparql` param | `"default"` key in config | Behaviour                                |
+|-----------------|---------------------------|------------------------------------------|
+| Not provided    | Present                   | Uses the `"default"` query               |
+| Not provided    | Absent                    | Uses the built-in default query           |
+| `my-query`      | —                         | Uses the `"my-query"` query from config   |
+| `unknown-key`   | —                         | Returns **400 Bad Request**               |
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### SPARQL Query Requirements
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+Each query **must return bindings** with at least:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+| Variable       | Required | Description                          |
+|----------------|----------|--------------------------------------|
+| `?label`       | Yes      | Concept label — mapped to `id` and `value` |
+| `?definition`  | No       | Concept definition — mapped to `description` |
+| `?schemeLabel` | No       | Vocabulary name — mapped to `referenceGlossary` |
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Any additional variables (e.g. `?concept`, `?scheme`) are allowed but ignored.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## Configuration
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+The service is configured via `application.yaml`, which supports `${ENV_VAR}` placeholder resolution from environment variables.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+### Configuration Parameters
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+| Parameter                        | Env Variable   | Default            | Description                              |
+|----------------------------------|----------------|--------------------|------------------------------------------|
+| `kgm.base_url`                  | `KGM_BASE_URL` | `http://kgm:8080`  | Base URL of the Knowledge Graph Manager  |
+| `kgm.sparql_queries`            | —              | `{}`               | Map of named SPARQL queries (see above)  |
+| `custom_url_picker.cors.origin`  | —              | `*`                | Allowed CORS origin                      |
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Running Locally
 
-## License
-For open source projects, say how it is licensed.
+### Prerequisites
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- Python 3.11+
+- [Poetry](https://python-poetry.org/)
+- A running KGM instance
+
+### Install dependencies
+
+```bash
+poetry install
+```
+
+### Run tests
+
+```bash
+poetry run pytest -v
+```
+
+### Start the server
+
+```bash
+# Point to your local KGM instance
+export KGM_BASE_URL="http://localhost:9980"
+
+poetry run uvicorn src.main:app --host 0.0.0.0 --port 5002
+```
+
+The service will be available at `http://localhost:5002`.
+
+### API Endpoints
+
+| Method | Path                       | Description                          |
+|--------|----------------------------|--------------------------------------|
+| POST   | `/v1/resources`            | Retrieve paginated drop-down options |
+| POST   | `/v1/resources/validate`   | Validate previously selected values  |
+| GET    | `/health`                  | Health check                         |
+
+### Query Parameters
+
+| Parameter       | In         | Required | Description                                                     |
+|-----------------|------------|----------|-----------------------------------------------------------------|
+| `offset`        | URL query  | Yes      | Number of items to skip (pagination)                            |
+| `limit`         | URL query  | Yes      | Number of items to return (min 5)                               |
+| `filter`        | URL query  | No       | Free-text filter on value, description, referenceGlossary       |
+| `sparql`        | POST body  | No       | Key of the named SPARQL query to execute                        |
+| `sparql-params` | POST body  | No       | Comma-separated positional params; use `|` inside a param for list placeholders |
+
+#### Example: retrieve business concepts
+
+```bash
+curl -X POST 'http://localhost:5002/v1/resources?offset=0&limit=10' \
+  -H 'Content-Type: application/json' \
+  -d '{"sparql": "business-concept-query"}'
+```
+
+#### Example: retrieve business terms for multiple parent concepts
+
+```bash
+curl -X POST 'http://localhost:5002/v1/resources?offset=0&limit=10&filter=customer' \
+  -H 'Content-Type: application/json' \
+  -d '{"sparql": "business-term-query", "sparql-params": "Customer Metric|Investment"}'
+```
+
+#### Example: validate selections
+
+```bash
+curl -X POST 'http://localhost:5002/v1/resources/validate' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "selectedObjects": [{"id": "Banking Channels"}],
+    "queryParameters": {"sparql": "business-concept-query"}
+  }'
+```
+
+## Docker
+
+### Build
+
+```bash
+docker build -t kgm-custom-url-picker:latest .
+```
+
+### Run
+
+```bash
+docker run -d --rm --name kgm-custom-url-picker \
+  -p 5002:5002 \
+  -e KGM_BASE_URL="http://host.docker.internal:9980" \
+  kgm-custom-url-picker:latest
+```
+
+> **Note:** Use `host.docker.internal` to reach services running on the Docker host (macOS/Windows). On Linux, use `--network host` or the host IP.
+
+To configure custom SPARQL queries via Docker, mount a custom `application.yaml`:
+
+```bash
+docker run -d --rm --name kgm-custom-url-picker \
+  -p 5002:5002 \
+  -v $(pwd)/application.yaml:/app/application.yaml \
+  kgm-custom-url-picker:latest
+```
+
+To stop:
+
+```bash
+docker stop kgm-custom-url-picker
+```
+
+## Kubernetes (Helm)
+
+### Install
+
+```bash
+helm install kgm-custom-url-picker ./helm
+```
+
+### Helm Values
+
+| Key                        | Type   | Default            | Description                                                   |
+|----------------------------|--------|--------------------|---------------------------------------------------------------|
+| `image.registry`           | string | `registry.example.com/kgm-custom-url-picker` | Docker image registry                      |
+| `image.tag`                | string | `latest`           | Docker image tag                                              |
+| `image.pullPolicy`         | string | `Always`           | Image pull policy                                             |
+| `kgm.baseUrl`              | string | `http://kgm:8080`  | Base URL of the KGM service                                   |
+| `kgm.sparqlQueries`        | object | `{}`               | Map of named SPARQL queries (rendered into the ConfigMap)      |
+| `dockerRegistrySecretName`  | string | `regcred`          | Name of the image pull secret                                 |
+| `extraEnvVars`             | list   | `[]`               | Additional environment variables                              |
+| `configOverride`           | string | `nil`              | Override the full `application.yaml` content                  |
+| `securityContext`           | object | `{runAsUser: 1001, ...}` | Pod security context                                   |
+| `readinessProbe`           | object | `{}`               | Readiness probe configuration                                 |
+| `livenessProbe`            | object | `{}`               | Liveness probe configuration                                  |
+| `resources`                | object | `{}`               | CPU/memory resource limits                                    |
+| `labels`                   | object | `{}`               | Additional labels to apply                                    |
+
+### Deploy with custom queries
+
+Create a `custom-values.yaml`:
+
+```yaml
+kgm:
+  baseUrl: "http://my-kgm:9090"
+  sparqlQueries:
+    business-concept-query: |
+      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+      SELECT DISTINCT ?label ?definition ?schemeLabel
+      WHERE {
+        ?concept a skos:Concept ;
+                 skos:inScheme ?scheme .
+        { ?child skos:broader ?concept . }
+        UNION
+        { ?concept skos:narrower ?child . }
+        OPTIONAL { ?concept skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+        OPTIONAL { ?concept skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
+      }
+      ORDER BY ?schemeLabel ?label
+    business-term-query: |
+      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+      SELECT DISTINCT ?label ?definition ?schemeLabel
+      WHERE {
+        VALUES ?parentLabel { ${1*} }
+        ?parent skos:prefLabel ?parentLabel .
+        ?term a skos:Concept ;
+              skos:broader ?parent ;
+              skos:inScheme ?scheme .
+        OPTIONAL { ?term skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+        OPTIONAL { ?term skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
+      }
+      ORDER BY ?label
+
+image:
+  registry: "my-registry.com/kgm-custom-url-picker"
+  tag: "1.0.0"
+```
+
+```bash
+helm install kgm-custom-url-picker ./helm -f custom-values.yaml
+```
+
+### Using in a Witboost Template
+
+Configure `EntitySearchPicker` fields in your template. The `params` map is sent as the POST body, where `sparql` and `sparql-params` select and parameterise the named query.
+
+#### Business Concept Selector
+
+```yaml
+properties:
+  businessConcept:
+    title: Business Concept
+    ui:field: EntitySearchPicker
+    ui:options:
+      entities:
+        - type: Remote
+          displayName: Business Concepts
+          fieldsToSave:
+            - id
+            - value
+            - description
+            - referenceGlossary
+          columns:
+            - name: 'Name'
+              path: '{{value}}'
+            - name: 'Description'
+              path: '{{description}}'
+            - name: 'Glossary'
+              path: '{{referenceGlossary}}'
+          displayField: '{{value}}'
+          userFilters: ['search']
+          apiSpec:
+            retrieval:
+              baseUrl: 'http://kgm-custom-url-picker:5002'
+              path: '/v1/resources'
+              method: 'POST'
+              params:
+                sparql: 'business-concept-query'
+```
+
+#### Business Term Selector (filtered by selected concepts)
+
+Assumes `businessConcept` is a multi-select field whose selected `id` values
+are joined with `|` and passed via `sparql-params`. The `${1*}` placeholder
+in the query expands them into a SPARQL `VALUES` clause.
+
+```yaml
+  businessTerm:
+    title: Business Term
+    ui:field: EntitySearchPicker
+    ui:options:
+      entities:
+        - type: Remote
+          displayName: Business Terms
+          fieldsToSave:
+            - id
+            - value
+            - description
+          columns:
+            - name: 'Name'
+              path: '{{value}}'
+            - name: 'Description'
+              path: '{{description}}'
+          displayField: '{{value}}'
+          userFilters: ['search']
+          apiSpec:
+            retrieval:
+              baseUrl: 'http://kgm-custom-url-picker:5002'
+              path: '/v1/resources'
+              method: 'POST'
+              params:
+                sparql: 'business-term-query'
+                sparql-params: '{{businessConcept.id}}'
+```
+
+> **Note:** If `businessConcept` is a single-select, `{{businessConcept.id}}` is a single label
+> like `"Customer Metric"`. If multi-select, join the selected IDs with `|` pipes,
+> e.g. `"Customer Metric|Investment"`, so `${1*}` expands to
+> `"Customer Metric" "Investment"` in the SPARQL `VALUES` clause.
+
+## Project Structure
+
+```
+├── application.yaml              # App config (env-var placeholders + named queries)
+├── pyproject.toml                # Poetry dependencies
+├── server_start.sh               # Uvicorn startup script
+├── Dockerfile                    # Container image
+├── custom-url-picker-openapi.yaml# OpenAPI specification
+├── example-kgm-response.yaml     # Example KGM SPARQL response
+│
+├── src/
+│   ├── main.py                   # FastAPI app, middleware, health check
+│   ├── dependencies.py           # Dependency injection wiring
+│   ├── settings.py               # YAML config loader with ${ENV_VAR} resolution
+│   ├── models/
+│   │   └── api_models.py         # Pydantic models (Item, ValidationRequest, etc.)
+│   ├── routers/
+│   │   └── custom_url_picker_router.py   # POST /v1/resources, POST /v1/resources/validate
+│   └── services/
+│       ├── external_service.py           # Abstract interface
+│       └── kgm_service.py                # KGM SPARQL implementation (named queries)
+│
+├── tests/
+│   ├── conftest.py               # Shared fixtures + in-memory mock service
+│   ├── test_health.py            # Health endpoint tests
+│   ├── test_resources.py         # /v1/resources route tests
+│   ├── test_validate.py          # /v1/resources/validate route tests
+│   └── test_kgm_service.py      # KgmService unit tests (queries, params, mapping)
+│
+└── helm/                         # Helm chart for Kubernetes deployment
+    ├── Chart.yaml
+    ├── values.yaml
+    └── templates/
+        ├── _helpers.tpl
+        ├── configmap.yaml        # Renders named queries from values
+        ├── deployment.yaml
+        └── service.yaml
+```
