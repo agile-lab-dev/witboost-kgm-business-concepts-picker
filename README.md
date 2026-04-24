@@ -26,16 +26,53 @@ Witboost UI  ──▶  POST /v1/resources?offset=0&limit=5&filter=…
                   └─────────────┘                            └─────────┘
 ```
 
-### Item Mapping
+### Item Mapping — `fieldMapping`
 
-The SPARQL query results are mapped to Custom URL Picker items as follows:
+Each SPARQL query can define a **`fieldMapping`** that controls how SPARQL result variables are mapped to the JSON fields of each picker item. The mapping is a flat `{ itemField: sparqlVariable }` dict:
 
-| Custom URL Picker field | SPARQL binding    | Description                              |
-|-------------------------|-------------------|------------------------------------------|
-| `id`                    | `?label`          | The concept label (used as identifier)   |
-| `value`                 | `?label`          | The concept label (displayed to user)    |
-| `description`           | `?definition`     | The concept definition                   |
-| `referenceGlossary`     | `?schemeLabel`    | The vocabulary/scheme the concept belongs to |
+- **`id`** is mandatory — bindings where the mapped variable has no value are skipped.
+- **`value`**, **`description`** are optional core fields.
+- **Any other key** becomes an extra flat field on the item JSON (the model uses `additionalProperties: true`).
+
+You can map **as many fields as you want**. Only the variables listed in `fieldMapping` end up in the item; unmapped SPARQL variables are ignored.
+
+#### Default mapping
+
+When no `fieldMapping` is provided (or the query is a plain string), the built-in default mapping is used:
+
+| Item field          | SPARQL variable | Description                              |
+|---------------------|-----------------|------------------------------------------|
+| `id`                | `?label`        | The concept label (used as identifier)   |
+| `value`             | `?label`        | The concept label (displayed to user)    |
+| `description`       | `?definition`   | The concept definition                   |
+| `referenceGlossary` | `?schemeLabel`  | The vocabulary/scheme the concept belongs to |
+
+#### Custom mapping example
+
+```yaml
+sparql_queries:
+  data-products:
+    query: |
+      SELECT ?dpName ?dpDomain ?dpOwner ?dpStatus WHERE { ... }
+    fieldMapping:
+      id: dpName
+      value: dpName
+      description: dpDomain
+      owner: dpOwner
+      status: dpStatus
+```
+
+Produces items like:
+
+```json
+{
+  "id": "MyDataProduct",
+  "value": "MyDataProduct",
+  "description": "Finance",
+  "owner": "Alice",
+  "status": "Active"
+}
+```
 
 ## Named SPARQL Queries
 
@@ -56,33 +93,38 @@ Queries can contain **scalar** and **list** placeholders that are replaced at ru
 
 ### Example Configuration
 
+Each named query can be either a **plain SPARQL string** (backward-compatible, uses the default field mapping) or a **structured object** with `query` and `fieldMapping`:
+
 ```yaml
 kgm:
   base_url: "http://kgm:8080"
   sparql_queries:
-    # Fetch top-level business concepts (parents)
-    business-concept-query: |
-      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-      SELECT DISTINCT ?label ?definition ?schemeLabel
-      WHERE {
-        ?concept a skos:Concept ;
-                 skos:inScheme ?scheme .
-        { ?child skos:broader ?concept . }
-        UNION
-        { ?concept skos:narrower ?child . }
-        OPTIONAL { ?concept skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
-        OPTIONAL { ?concept skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
-        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
-      }
-      ORDER BY ?schemeLabel ?label
+    # ── Structured format with explicit fieldMapping ─────────────────
+    business-concept-query:
+      query: |
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT DISTINCT ?label ?definition ?schemeLabel
+        WHERE {
+          ?concept a skos:Concept ;
+                   skos:inScheme ?scheme .
+          { ?child skos:broader ?concept . }
+          UNION
+          { ?concept skos:narrower ?child . }
+          OPTIONAL { ?concept skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+          OPTIONAL { ?concept skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+          OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
+        }
+        ORDER BY ?schemeLabel ?label
+      fieldMapping:
+        id: label
+        value: label
+        description: definition
+        referenceGlossary: schemeLabel
 
-    # Fetch business terms narrower than one or more parent concepts.
-    # ${1*} is replaced with pipe-separated concept labels.
-    # e.g. sparql-params = "Customer Metric|Investment"
-    #   → VALUES ?parentLabel { "Customer Metric" "Investment" }
+    # ── Plain string format (uses default mapping) ───────────────────
     business-term-query: |
       PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-      SELECT DISTINCT ?label ?definition ?schemeLabel
+      SELECT DISTINCT ?label ?definition (?parentLabel AS ?schemeLabel)
       WHERE {
         VALUES ?parentLabel { ${1*} }
         ?parent skos:prefLabel ?parentLabel .
@@ -91,9 +133,20 @@ kgm:
               skos:inScheme ?scheme .
         OPTIONAL { ?term skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
         OPTIONAL { ?term skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
-        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
       }
       ORDER BY ?label
+
+    # ── Custom domain with extra fields ──────────────────────────────
+    data-product-query:
+      query: |
+        SELECT ?dpName ?dpDomain ?dpOwner ?dpStatus
+        WHERE { ?dp a :DataProduct . ... }
+      fieldMapping:
+        id: dpName
+        value: dpName
+        description: dpDomain
+        owner: dpOwner
+        status: dpStatus
 ```
 
 ### Query Resolution Rules
@@ -107,7 +160,7 @@ kgm:
 
 ### SPARQL Query Requirements
 
-Each query **must return bindings** with at least:
+When using the **default field mapping** (no `fieldMapping` specified), the query must return:
 
 | Variable       | Required | Description                          |
 |----------------|----------|--------------------------------------|
@@ -115,7 +168,7 @@ Each query **must return bindings** with at least:
 | `?definition`  | No       | Concept definition — mapped to `description` |
 | `?schemeLabel` | No       | Vocabulary name — mapped to `referenceGlossary` |
 
-Any additional variables (e.g. `?concept`, `?scheme`) are allowed but ignored.
+When using a **custom `fieldMapping`**, the query must return at least the SPARQL variable mapped to `id`. All other mapped variables are optional — missing values become `null` in the item JSON. Unmapped SPARQL variables are ignored.
 
 ## Configuration
 
@@ -174,7 +227,7 @@ The service will be available at `http://localhost:5002`.
 |-----------------|------------|----------|-----------------------------------------------------------------|
 | `offset`        | URL query  | Yes      | Number of items to skip (pagination)                            |
 | `limit`         | URL query  | Yes      | Number of items to return (min 5)                               |
-| `filter`        | URL query  | No       | Free-text filter on value, description, referenceGlossary       |
+| `filter`        | URL query  | No       | Free-text filter across all mapped item fields              |
 | `sparql`        | POST body  | No       | Key of the named SPARQL query to execute                        |
 | `sparql-params` | POST body  | No       | Comma-separated positional params; use `|` inside a param for list placeholders |
 
@@ -273,23 +326,32 @@ Create a `custom-values.yaml`:
 kgm:
   baseUrl: "http://my-kgm:9090"
   sparqlQueries:
-    business-concept-query: |
-      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-      SELECT DISTINCT ?label ?definition ?schemeLabel
-      WHERE {
-        ?concept a skos:Concept ;
-                 skos:inScheme ?scheme .
-        { ?child skos:broader ?concept . }
-        UNION
-        { ?concept skos:narrower ?child . }
-        OPTIONAL { ?concept skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
-        OPTIONAL { ?concept skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
-        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
-      }
-      ORDER BY ?schemeLabel ?label
+    # Structured format with explicit fieldMapping
+    business-concept-query:
+      query: |
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT DISTINCT ?label ?definition ?schemeLabel
+        WHERE {
+          ?concept a skos:Concept ;
+                   skos:inScheme ?scheme .
+          { ?child skos:broader ?concept . }
+          UNION
+          { ?concept skos:narrower ?child . }
+          OPTIONAL { ?concept skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+          OPTIONAL { ?concept skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+          OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
+        }
+        ORDER BY ?schemeLabel ?label
+      fieldMapping:
+        id: label
+        value: label
+        description: definition
+        referenceGlossary: schemeLabel
+
+    # Plain string format (backward-compatible, uses default mapping)
     business-term-query: |
       PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-      SELECT DISTINCT ?label ?definition ?schemeLabel
+      SELECT DISTINCT ?label ?definition (?parentLabel AS ?schemeLabel)
       WHERE {
         VALUES ?parentLabel { ${1*} }
         ?parent skos:prefLabel ?parentLabel .
@@ -298,7 +360,6 @@ kgm:
               skos:inScheme ?scheme .
         OPTIONAL { ?term skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
         OPTIONAL { ?term skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
-        OPTIONAL { ?scheme skos:prefLabel ?schemeLabel . FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "") }
       }
       ORDER BY ?label
 
@@ -388,6 +449,44 @@ in the query expands them into a SPARQL `VALUES` clause.
 > like `"Customer Metric"`. If multi-select, join the selected IDs with `|` pipes,
 > e.g. `"Customer Metric|Investment"`, so `${1*}` expands to
 > `"Customer Metric" "Investment"` in the SPARQL `VALUES` clause.
+
+#### Custom Domain Selector (with extra fields)
+
+When using a custom `fieldMapping`, include the extra fields in `fieldsToSave` and `columns`:
+
+```yaml
+  dataProduct:
+    title: Data Product
+    ui:field: EntitySearchPicker
+    ui:options:
+      entities:
+        - type: Remote
+          displayName: Data Products
+          fieldsToSave:
+            - id
+            - value
+            - description
+            - owner
+            - status
+          columns:
+            - name: 'Name'
+              path: '{{value}}'
+            - name: 'Domain'
+              path: '{{description}}'
+            - name: 'Owner'
+              path: '{{owner}}'
+            - name: 'Status'
+              path: '{{status}}'
+          displayField: '{{value}}'
+          userFilters: ['search']
+          apiSpec:
+            retrieval:
+              baseUrl: 'http://kgm-custom-url-picker:5002'
+              path: '/v1/resources'
+              method: 'POST'
+              params:
+                sparql: 'data-product-query'
+```
 
 ## Project Structure
 

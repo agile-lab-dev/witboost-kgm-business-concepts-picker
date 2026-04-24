@@ -24,18 +24,27 @@ kgm:
   # The caller selects which query to run via ?sparql=<key>.
   # If no key is specified, the "default" key is used.
   # If "default" is not configured, the built-in default query is used.
+  # Each query can be a plain string (uses default field mapping) or an object
+  # with "query" and "fieldMapping" keys.
   # Placeholders $1, $2, … are replaced with ?sparql-params values.
   sparqlQueries: {}
-  # Example:
+  # Example with plain string (backward-compatible, uses default mapping):
   #   sparqlQueries:
   #     business-concept-query: |
   #       PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
   #       SELECT DISTINCT ?label ?definition ?schemeLabel
   #       WHERE { ... }
-  #     business-term-query: |
-  #       PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-  #       SELECT DISTINCT ?label ?definition ?schemeLabel
-  #       WHERE { ?term skos:broader <$1> ; ... }
+  #
+  # Example with custom field mapping:
+  #   sparqlQueries:
+  #     data-products:
+  #       query: |
+  #         SELECT ?dpName ?dpDomain ?dpOwner WHERE { ... }
+  #       fieldMapping:
+  #         id: dpName
+  #         value: dpName
+  #         description: dpDomain
+  #         owner: dpOwner
 
 # -- define extra variables to add to the container(s)
 # e.g:

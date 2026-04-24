@@ -17,7 +17,6 @@ class Item(BaseModel):
     id: str
     value: str | None = None
     description: str | None = None
-    referenceGlossary: str | None = None
 
 
 # ---------------------------------------------------------------------------

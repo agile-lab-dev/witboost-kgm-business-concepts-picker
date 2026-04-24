@@ -5,8 +5,8 @@ import pytest
 import respx
 
 from src.models.api_models import SelectedObject
-from src.services.kgm_service import DEFAULT_SPARQL_QUERY, KgmService
-from src.settings import AppSettings, KgmConfig
+from src.services.kgm_service import DEFAULT_FIELD_MAPPING, DEFAULT_SPARQL_QUERY, KgmService
+from src.settings import AppSettings, KgmConfig, SparqlQueryConfig
 
 
 # ---------------------------------------------------------------------------
@@ -202,14 +202,18 @@ class TestNamedSparqlQueries:
         """No queries in config + no sparql_key → built-in default."""
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE))
         svc = KgmService(settings)
-        assert svc._resolve_query() == DEFAULT_SPARQL_QUERY
+        query, mapping = svc._resolve_query()
+        assert query == DEFAULT_SPARQL_QUERY
+        assert mapping == DEFAULT_FIELD_MAPPING
 
     def test_uses_configured_default_key(self):
         """'default' key in config is used when no sparql_key is given."""
         custom = "SELECT ?label WHERE { ?s ?p ?o }"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"default": custom}))
         svc = KgmService(settings)
-        assert svc._resolve_query() == custom
+        query, mapping = svc._resolve_query()
+        assert query == custom
+        assert mapping == DEFAULT_FIELD_MAPPING
 
     def test_resolves_named_query(self):
         """Explicit sparql_key selects the right query."""
@@ -219,8 +223,10 @@ class TestNamedSparqlQueries:
         }
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries=queries))
         svc = KgmService(settings)
-        assert svc._resolve_query("business-concept") == queries["business-concept"]
-        assert svc._resolve_query("business-term") == queries["business-term"]
+        q1, _ = svc._resolve_query("business-concept")
+        q2, _ = svc._resolve_query("business-term")
+        assert q1 == queries["business-concept"]
+        assert q2 == queries["business-term"]
 
     def test_unknown_key_raises_key_error(self):
         """Requesting a non-existent key raises KeyError."""
@@ -234,7 +240,7 @@ class TestNamedSparqlQueries:
         query = "SELECT ?label WHERE { ?t skos:broader <$1> ; skos:inScheme <$2> }"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": query}))
         svc = KgmService(settings)
-        resolved = svc._resolve_query("q", ["http://example.org/C1", "http://example.org/S1"])
+        resolved, _ = svc._resolve_query("q", ["http://example.org/C1", "http://example.org/S1"])
         assert "http://example.org/C1" in resolved
         assert "http://example.org/S1" in resolved
         assert "$1" not in resolved
@@ -245,7 +251,8 @@ class TestNamedSparqlQueries:
         query = "SELECT ?label WHERE { ?t skos:broader <$1> }"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": query}))
         svc = KgmService(settings)
-        assert "$1" in svc._resolve_query("q")
+        resolved, _ = svc._resolve_query("q")
+        assert "$1" in resolved
 
     @respx.mock
     def test_search_sends_named_query_to_kgm(self):
@@ -295,7 +302,7 @@ class TestNamedSparqlQueries:
         query = "VALUES ?x { ${1*} }"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": query}))
         svc = KgmService(settings)
-        resolved = svc._resolve_query("q", ["Customer Metric"])
+        resolved, _ = svc._resolve_query("q", ["Customer Metric"])
         assert resolved == 'VALUES ?x { "Customer Metric" }'
 
     def test_list_placeholder_multiple_values(self):
@@ -303,7 +310,7 @@ class TestNamedSparqlQueries:
         query = "VALUES ?x { ${1*} }"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": query}))
         svc = KgmService(settings)
-        resolved = svc._resolve_query("q", ["Customer Metric|Investment|Revenue"])
+        resolved, _ = svc._resolve_query("q", ["Customer Metric|Investment|Revenue"])
         assert resolved == 'VALUES ?x { "Customer Metric" "Investment" "Revenue" }'
 
     def test_list_placeholder_with_scalar(self):
@@ -311,7 +318,7 @@ class TestNamedSparqlQueries:
         query = "VALUES ?x { ${1*} } FILTER(?y = $2)"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": query}))
         svc = KgmService(settings)
-        resolved = svc._resolve_query("q", ["A|B", "hello"])
+        resolved, _ = svc._resolve_query("q", ["A|B", "hello"])
         assert '"A" "B"' in resolved
         assert "hello" in resolved
         assert "${1*}" not in resolved
@@ -322,4 +329,153 @@ class TestNamedSparqlQueries:
         query = "VALUES ?x { ${1*} }"
         settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": query}))
         svc = KgmService(settings)
-        assert "${1*}" in svc._resolve_query("q")
+        resolved, _ = svc._resolve_query("q")
+        assert "${1*}" in resolved
+
+
+# ---------------------------------------------------------------------------
+# Tests — custom field mapping
+# ---------------------------------------------------------------------------
+
+
+class TestFieldMapping:
+    def test_custom_mapping_maps_id(self):
+        """fieldMapping maps the 'id' field to a custom SPARQL variable."""
+        bindings = [
+            {
+                "dpName": {"type": "literal", "value": "MyDP"},
+                "dpDomain": {"type": "literal", "value": "Finance"},
+            },
+        ]
+        mapping = {"id": "dpName", "value": "dpName", "description": "dpDomain"}
+        items = KgmService._map_to_items(bindings, mapping)
+        assert len(items) == 1
+        assert items[0].id == "MyDP"
+        assert items[0].value == "MyDP"
+        assert items[0].description == "Finance"
+
+    def test_extra_fields_are_flat(self):
+        """Extra fields beyond id/value/description appear flat on the item."""
+        bindings = [
+            {
+                "dpName": {"type": "literal", "value": "MyDP"},
+                "dpOwner": {"type": "literal", "value": "John"},
+                "dpStatus": {"type": "literal", "value": "Active"},
+            },
+        ]
+        mapping = {"id": "dpName", "owner": "dpOwner", "status": "dpStatus"}
+        items = KgmService._map_to_items(bindings, mapping)
+        assert len(items) == 1
+        assert items[0].id == "MyDP"
+        dumped = items[0].model_dump()
+        assert dumped["owner"] == "John"
+        assert dumped["status"] == "Active"
+
+    def test_missing_optional_field_is_none(self):
+        """If a mapped SPARQL variable is absent, the field is None."""
+        bindings = [
+            {"dpName": {"type": "literal", "value": "MyDP"}},
+        ]
+        mapping = {"id": "dpName", "value": "dpName", "description": "dpDomain"}
+        items = KgmService._map_to_items(bindings, mapping)
+        assert items[0].description is None
+
+    def test_skips_bindings_without_id_var(self):
+        """Bindings without the mapped id variable are skipped."""
+        bindings = [
+            {"dpDomain": {"type": "literal", "value": "Finance"}},
+        ]
+        mapping = {"id": "dpName"}
+        items = KgmService._map_to_items(bindings, mapping)
+        assert len(items) == 0
+
+    def test_no_mapping_uses_default(self):
+        """Without explicit mapping, the default mapping is used."""
+        items = KgmService._map_to_items(SPARQL_RESPONSE["results"]["bindings"])
+        assert items[0].id == "Concept One"
+        assert items[0].description == "The first concept"
+
+    def test_structured_config_provides_mapping(self):
+        """SparqlQueryConfig with fieldMapping is resolved correctly."""
+        cfg = SparqlQueryConfig(
+            query="SELECT ?dpName ?dpDomain WHERE { ?s ?p ?o }",
+            field_mapping={"id": "dpName", "description": "dpDomain"},
+        )
+        settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"dp": cfg}))
+        svc = KgmService(settings)
+        _, mapping = svc._resolve_query("dp")
+        assert mapping == {"id": "dpName", "description": "dpDomain"}
+
+    def test_structured_config_without_mapping_uses_default(self):
+        """SparqlQueryConfig without fieldMapping uses default mapping."""
+        cfg = SparqlQueryConfig(query="SELECT ?label WHERE { ?s ?p ?o }")
+        settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": cfg}))
+        svc = KgmService(settings)
+        _, mapping = svc._resolve_query("q")
+        assert mapping == DEFAULT_FIELD_MAPPING
+
+    def test_string_config_uses_default_mapping(self):
+        """Plain string query config uses default field mapping."""
+        settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"q": "SELECT ?label WHERE { ?s ?p ?o }"}))
+        svc = KgmService(settings)
+        _, mapping = svc._resolve_query("q")
+        assert mapping == DEFAULT_FIELD_MAPPING
+
+    @respx.mock
+    def test_search_with_custom_mapping(self):
+        """search() applies custom field mapping end-to-end."""
+        custom_response = {
+            "results": {
+                "bindings": [
+                    {
+                        "dpName": {"type": "literal", "value": "DataProduct1"},
+                        "dpDomain": {"type": "literal", "value": "Finance"},
+                        "dpOwner": {"type": "literal", "value": "Alice"},
+                    },
+                ],
+            },
+        }
+        cfg = SparqlQueryConfig(
+            query="SELECT ?dpName ?dpDomain ?dpOwner WHERE { ?s ?p ?o }",
+            field_mapping={"id": "dpName", "value": "dpName", "description": "dpDomain", "owner": "dpOwner"},
+        )
+        settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"dp": cfg}))
+        svc = KgmService(settings)
+        respx.mock.post(SPARQL_URL).mock(
+            return_value=httpx.Response(200, json=custom_response)
+        )
+        items = svc.search(offset=0, limit=100, sparql_key="dp")
+        assert len(items) == 1
+        assert items[0].id == "DataProduct1"
+        assert items[0].description == "Finance"
+        assert items[0].model_dump()["owner"] == "Alice"
+
+    @respx.mock
+    def test_filter_on_extra_fields(self):
+        """filter matches against extra mapped fields too."""
+        custom_response = {
+            "results": {
+                "bindings": [
+                    {
+                        "dpName": {"type": "literal", "value": "DataProduct1"},
+                        "dpOwner": {"type": "literal", "value": "Alice"},
+                    },
+                    {
+                        "dpName": {"type": "literal", "value": "DataProduct2"},
+                        "dpOwner": {"type": "literal", "value": "Bob"},
+                    },
+                ],
+            },
+        }
+        cfg = SparqlQueryConfig(
+            query="SELECT ?dpName ?dpOwner WHERE { ?s ?p ?o }",
+            field_mapping={"id": "dpName", "value": "dpName", "owner": "dpOwner"},
+        )
+        settings = AppSettings(kgm=KgmConfig(base_url=KGM_BASE, sparql_queries={"dp": cfg}))
+        svc = KgmService(settings)
+        respx.mock.post(SPARQL_URL).mock(
+            return_value=httpx.Response(200, json=custom_response)
+        )
+        items = svc.search(offset=0, limit=100, sparql_key="dp", filter="alice")
+        assert len(items) == 1
+        assert items[0].id == "DataProduct1"

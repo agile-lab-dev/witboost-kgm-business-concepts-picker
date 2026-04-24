@@ -20,7 +20,15 @@ from loguru import logger
 
 from src.models.api_models import Item, SelectedObject
 from src.services.external_service import ExternalService
-from src.settings import AppSettings
+from src.settings import AppSettings, SparqlQueryConfig
+
+# Default field mapping used when no explicit mapping is configured.
+DEFAULT_FIELD_MAPPING: dict[str, str] = {
+    "id": "label",
+    "value": "label",
+    "description": "definition",
+    "referenceGlossary": "schemeLabel",
+}
 
 DEFAULT_SPARQL_QUERY = """\
 PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
@@ -64,13 +72,17 @@ class KgmService(ExternalService):
 
     def __init__(self, settings: AppSettings) -> None:
         self._base_url: str = settings.kgm.base_url.rstrip("/")
-        self._sparql_queries: dict[str, str] = {
-            k: v.strip() for k, v in settings.kgm.sparql_queries.items() if v.strip()
-        }
+        self._sparql_configs: dict[str, SparqlQueryConfig] = {}
+        for k, v in settings.kgm.sparql_queries.items():
+            if isinstance(v, SparqlQueryConfig):
+                if v.query.strip():
+                    self._sparql_configs[k] = v
+            elif isinstance(v, str) and v.strip():
+                self._sparql_configs[k] = SparqlQueryConfig(query=v.strip())
         logger.info(
             "KgmService initialised (base_url={}, queries={})",
             self._base_url,
-            list(self._sparql_queries.keys()) or ["<built-in default>"],
+            list(self._sparql_configs.keys()) or ["<built-in default>"],
         )
 
     # ---- Query resolution -------------------------------------------------
@@ -79,13 +91,16 @@ class KgmService(ExternalService):
         self,
         sparql_key: str | None = None,
         sparql_params: list[str] | None = None,
-    ) -> str:
+    ) -> tuple[str, dict[str, str]]:
         """
         Look up a named SPARQL query and replace positional placeholders.
 
+        Returns a ``(query, field_mapping)`` tuple.
+
         - If *sparql_key* is ``None``, the ``"default"`` key is used.
         - If the key is ``"default"`` and not present in the configured
-          queries, the built-in ``DEFAULT_SPARQL_QUERY`` is returned.
+          queries, the built-in ``DEFAULT_SPARQL_QUERY`` is returned with
+          the default field mapping.
         - Placeholders ``$1``, ``$2``, … are replaced with the
           corresponding values from *sparql_params*.
         - List placeholders ``${1*}``, ``${2*}``, … expand a
@@ -94,12 +109,15 @@ class KgmService(ExternalService):
         """
         key = sparql_key or "default"
 
-        if key in self._sparql_queries:
-            query = self._sparql_queries[key]
+        if key in self._sparql_configs:
+            cfg = self._sparql_configs[key]
+            query = cfg.query
+            field_mapping = cfg.field_mapping or DEFAULT_FIELD_MAPPING
         elif key == "default":
             query = DEFAULT_SPARQL_QUERY
+            field_mapping = DEFAULT_FIELD_MAPPING
         else:
-            available = list(self._sparql_queries.keys())
+            available = list(self._sparql_configs.keys())
             raise KeyError(
                 f"SPARQL query '{key}' is not configured. "
                 f"Available queries: {available}"
@@ -115,7 +133,7 @@ class KgmService(ExternalService):
                 # Scalar placeholder $N
                 query = query.replace(f"${i}", param)
 
-        return query
+        return query, field_mapping
 
     # ---- KGM SPARQL call --------------------------------------------------
 
@@ -138,30 +156,41 @@ class KgmService(ExternalService):
     # ---- Response mapping -------------------------------------------------
 
     @staticmethod
-    def _map_to_items(bindings: list[dict]) -> list[Item]:
+    def _map_to_items(
+        bindings: list[dict],
+        field_mapping: dict[str, str] | None = None,
+    ) -> list[Item]:
         """
-        Map SPARQL result bindings to Items.
+        Map SPARQL result bindings to Items using *field_mapping*.
 
-        Mapping:
-          id                → label.value
-          value             → label.value
-          description       → definition.value
-          referenceGlossary → schemeLabel.value
+        *field_mapping* is a ``{item_field: sparql_var}`` dict.
+        ``id`` is mandatory — bindings where the mapped SPARQL variable
+        has no value are skipped.
+
+        Any mapped field beyond the core ``Item`` attributes (``id``,
+        ``value``, ``description``) is added as an extra flat field
+        thanks to ``model_config = ConfigDict(extra="allow")``.
         """
+        mapping = field_mapping or DEFAULT_FIELD_MAPPING
+        id_var = mapping.get("id")
+        if not id_var:
+            logger.warning("fieldMapping has no 'id' entry — cannot map items")
+            return []
+
         items: list[Item] = []
         for binding in bindings:
-            label = binding.get("label", {}).get("value", "")
-            definition = binding.get("definition", {}).get("value", "")
-            scheme_label = binding.get("schemeLabel", {}).get("value", "")
-            if label:
-                items.append(
-                    Item(
-                        id=label,
-                        value=label,
-                        description=definition or None,
-                        referenceGlossary=scheme_label or None,
-                    )
-                )
+            id_value = binding.get(id_var, {}).get("value", "")
+            if not id_value:
+                continue
+
+            fields: dict[str, str | None] = {"id": id_value}
+            for item_field, sparql_var in mapping.items():
+                if item_field == "id":
+                    continue
+                raw = binding.get(sparql_var, {}).get("value", "")
+                fields[item_field] = raw or None
+
+            items.append(Item(**fields))
         return items
 
     # ---- ExternalService interface ----------------------------------------
@@ -176,18 +205,20 @@ class KgmService(ExternalService):
         sparql_key: str | None = None,
         sparql_params: list[str] | None = None,
     ) -> list[Item]:
-        query = self._resolve_query(sparql_key, sparql_params)
+        query, field_mapping = self._resolve_query(sparql_key, sparql_params)
         bindings = self._fetch_concepts(query)
-        items = self._map_to_items(bindings)
+        items = self._map_to_items(bindings, field_mapping)
 
         if filter:
             lower = filter.lower()
             items = [
                 item
                 for item in items
-                if lower in (item.value or "").lower()
-                or lower in (item.description or "").lower()
-                or lower in (item.referenceGlossary or "").lower()
+                if any(
+                    lower in str(v).lower()
+                    for v in item.model_dump().values()
+                    if v is not None
+                )
             ]
 
         return items[offset : offset + limit]
@@ -199,9 +230,9 @@ class KgmService(ExternalService):
         sparql_key: str | None = None,
         sparql_params: list[str] | None = None,
     ) -> list[str]:
-        query = self._resolve_query(sparql_key, sparql_params)
+        query, field_mapping = self._resolve_query(sparql_key, sparql_params)
         bindings = self._fetch_concepts(query)
-        items = self._map_to_items(bindings)
+        items = self._map_to_items(bindings, field_mapping)
         known_ids = {item.id for item in items}
         errors: list[str] = []
         for obj in selected_objects:

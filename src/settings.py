@@ -5,6 +5,8 @@ Reads application.yaml, resolves ${ENV_VAR} placeholders from environment
 variables, and exposes a typed AppSettings object.
 """
 
+from __future__ import annotations
+
 import os
 import re
 from pathlib import Path
@@ -44,10 +46,20 @@ def _to_snake(name: str) -> str:
 
 def _convert_keys(obj: Any, preserve_keys: bool = False) -> Any:
     if isinstance(obj, dict):
-        return {
-            (k if preserve_keys else _to_snake(k)): _convert_keys(v, preserve_keys=(k == "sparql_queries" or k == "sparql-queries"))
-            for k, v in obj.items()
-        }
+        result = {}
+        for k, v in obj.items():
+            new_key = k if preserve_keys else _to_snake(k)
+            # Preserve original keys for direct children of these containers:
+            #   sparql_queries → query names (e.g. "business-term-query")
+            #   field_mapping  → item field names (e.g. "parentBusinessConcept")
+            child_preserve = new_key in (
+                "sparql_queries",
+                "sparql-queries",
+                "field_mapping",
+                "fieldMapping",
+            )
+            result[new_key] = _convert_keys(v, preserve_keys=child_preserve)
+        return result
     if isinstance(obj, list):
         return [_convert_keys(item) for item in obj]
     return obj
@@ -57,9 +69,15 @@ def _convert_keys(obj: Any, preserve_keys: bool = False) -> Any:
 # Pydantic settings models
 # ---------------------------------------------------------------------------
 
+class SparqlQueryConfig(BaseModel):
+    """A named SPARQL query with optional field mapping."""
+    query: str
+    field_mapping: dict[str, str] = {}
+
+
 class KgmConfig(BaseModel):
     base_url: str = "http://kgm:8080"
-    sparql_queries: dict[str, str] = {}
+    sparql_queries: dict[str, str | SparqlQueryConfig] = {}
 
 
 class CorsConfig(BaseModel):

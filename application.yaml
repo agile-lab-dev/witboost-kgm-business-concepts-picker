@@ -7,67 +7,83 @@ kgm:
   # If no ?sparql param is provided, the "default" key is used.
   # If "default" is not configured, the built-in default query is used.
   #
-  # Each query MUST return bindings with at least:
-  #   ?label       - the concept label (mapped to item id and value)
-  # Optional:
-  #   ?definition  - the concept definition (mapped to item description)
-  #   ?schemeLabel - the vocabulary/scheme name (mapped to item referenceGlossary)
+  # Each query can be either:
+  #   - A plain SPARQL string (uses the default field mapping: label→id/value,
+  #     definition→description, schemeLabel→referenceGlossary)
+  #   - An object with:
+  #       query:        the SPARQL query string
+  #       fieldMapping: a map of { itemField: sparqlVariable }
+  #                     "id" is mandatory; all other fields are optional.
+  #                     Extra fields beyond id/value/description are added flat
+  #                     to the item JSON.
   #
   # Placeholders:
   #   $1, $2, ...    - scalar, replaced with the corresponding comma-separated value
   #   ${1*}, ${2*}, ... - list, expands a pipe-separated value into SPARQL VALUES
   #                       e.g. "Customer Metric|Investment" → "Customer Metric" "Investment"
   sparql_queries:
-    business-concept-query: |
-      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+    business-concept-query:
+      query: |
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
 
-      SELECT DISTINCT ?concept ?label ?definition ?scheme ?schemeLabel
-      WHERE {
-        ?concept a skos:Concept ;
-                 skos:inScheme ?scheme .
+        SELECT DISTINCT ?concept ?label ?definition ?scheme ?schemeLabel
+        WHERE {
+          ?concept a skos:Concept ;
+                   skos:inScheme ?scheme .
 
-        {
-          ?child skos:broader ?concept .
-        }
-        UNION
-        {
-          ?concept skos:narrower ?child .
-        }
+          {
+            ?child skos:broader ?concept .
+          }
+          UNION
+          {
+            ?concept skos:narrower ?child .
+          }
 
-        OPTIONAL {
-          ?concept skos:prefLabel ?label .
-          FILTER(LANG(?label) = "en" || LANG(?label) = "")
-        }
+          OPTIONAL {
+            ?concept skos:prefLabel ?label .
+            FILTER(LANG(?label) = "en" || LANG(?label) = "")
+          }
 
-        OPTIONAL {
-          ?concept skos:definition ?definition .
-          FILTER(LANG(?definition) = "en" || LANG(?definition) = "")
-        }
+          OPTIONAL {
+            ?concept skos:definition ?definition .
+            FILTER(LANG(?definition) = "en" || LANG(?definition) = "")
+          }
 
-        OPTIONAL {
-          ?scheme skos:prefLabel ?schemeLabel .
-          FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "")
+          OPTIONAL {
+            ?scheme skos:prefLabel ?schemeLabel .
+            FILTER(LANG(?schemeLabel) = "en" || LANG(?schemeLabel) = "")
+          }
         }
-      }
-      ORDER BY ?schemeLabel ?label ?concept
+        ORDER BY ?schemeLabel ?label ?concept
+      fieldMapping:
+        id: label
+        value: label
+        description: definition
+        referenceGlossary: schemeLabel
 
     # Fetch business terms narrower than one or more parent concepts.
     # Uses ${1*} list placeholder: pipe-separated concept labels are expanded
     # into SPARQL VALUES syntax.
     # Usage: sparql-params = "Customer Metric|Investment"
-    business-term-query: |
-      PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
-      SELECT DISTINCT ?label ?definition (?parentLabel AS ?schemeLabel)
-      WHERE {
-        VALUES ?parentLabel { ${1*} }
-        ?parent skos:prefLabel ?parentLabel .
-        ?term a skos:Concept ;
-              skos:broader ?parent ;
-              skos:inScheme ?scheme .
-        OPTIONAL { ?term skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
-        OPTIONAL { ?term skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
-      }
-      ORDER BY ?label
+    business-term-query:
+      query: |
+        PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+        SELECT DISTINCT ?label ?definition (?parentLabel AS ?schemeLabel)
+        WHERE {
+          VALUES ?parentLabel { ${1*} }
+          ?parent skos:prefLabel ?parentLabel .
+          ?term a skos:Concept ;
+                skos:broader ?parent ;
+                skos:inScheme ?scheme .
+          OPTIONAL { ?term skos:prefLabel ?label . FILTER(LANG(?label) = "en" || LANG(?label) = "") }
+          OPTIONAL { ?term skos:definition ?definition . FILTER(LANG(?definition) = "en" || LANG(?definition) = "") }
+        }
+        ORDER BY ?label
+      fieldMapping:
+        id: label
+        value: label
+        description: definition
+        parentBusinessConcept: schemeLabel
 
 custom_url_picker:
   cors:
