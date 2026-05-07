@@ -1,6 +1,16 @@
+<p align="center">
+    <a href="https://www.witboost.com/">
+        <img src="docs/img/witboost_logo.svg" alt="witboost" width=600 >
+    </a>
+</p>
+
+Designed by [Agile Lab](https://www.agilelab.it/), Witboost is a versatile platform that addresses a wide range of sophisticated data engineering challenges. It enables businesses to discover, enhance, and productize their data, fostering the creation of automated data platforms that adhere to the highest standards of data governance. Want to know more about Witboost? Check it out [here](https://www.witboost.com/) or [contact us!](https://witboost.com/contact-us)
+
+This repository is part of our [Starter Kit](https://github.com/agile-lab-dev/witboost-starter-kit) meant to showcase Witboost integration capabilities and provide a "batteries-included" product.
+
 # KGM Custom URL Picker
 
-A [Witboost](https://www.witboost.com/) **Custom URL Picker** microservice that serves drop-down options to templates by querying a **Knowledge Graph Manager (KGM)** SPARQL endpoint.
+A [Witboost](https://www.witboost.com/) **Custom URL Picker** microservice that serves drop-down options to templates by querying the **Witboost Knowledge Graph Manager (KGM)** [SPARQL endpoint](https://docs.witboost.com/docs/apis/witboost/knowledge-graph-manager#tag/Graph/operation/queryWithSparql).
 
 ## Overview
 
@@ -505,43 +515,4 @@ When using a custom `fieldMapping`, include the extra fields in `fieldsToSave` a
               method: 'POST'
               params:
                 sparql: 'data-product-query'
-```
-
-## Project Structure
-
-```
-├── application.yaml              # App config (env-var placeholders + named queries)
-├── pyproject.toml                # Poetry dependencies
-├── server_start.sh               # Uvicorn startup script
-├── Dockerfile                    # Container image
-├── custom-url-picker-openapi.yaml# OpenAPI specification
-├── example-kgm-response.yaml     # Example KGM SPARQL response
-│
-├── src/
-│   ├── main.py                   # FastAPI app, middleware, health check
-│   ├── dependencies.py           # Dependency injection wiring
-│   ├── settings.py               # YAML config loader with ${ENV_VAR} resolution
-│   ├── models/
-│   │   └── api_models.py         # Pydantic models (Item, ValidationRequest, etc.)
-│   ├── routers/
-│   │   └── custom_url_picker_router.py   # POST /v1/resources, POST /v1/resources/validate
-│   └── services/
-│       ├── external_service.py           # Abstract interface
-│       └── kgm_service.py                # KGM SPARQL implementation (named queries)
-│
-├── tests/
-│   ├── conftest.py               # Shared fixtures + in-memory mock service
-│   ├── test_health.py            # Health endpoint tests
-│   ├── test_resources.py         # /v1/resources route tests
-│   ├── test_validate.py          # /v1/resources/validate route tests
-│   └── test_kgm_service.py      # KgmService unit tests (queries, params, mapping)
-│
-└── helm/                         # Helm chart for Kubernetes deployment
-    ├── Chart.yaml
-    ├── values.yaml
-    └── templates/
-        ├── _helpers.tpl
-        ├── configmap.yaml        # Renders named queries from values
-        ├── deployment.yaml
-        └── service.yaml
 ```
